@@ -1,4 +1,4 @@
-== 2026-11-16T16:04:37Z ==
+== 2026-11-16T16:10:06Z ==
 secret CLOUDFLARE_API_TOKEN: var
 secret WHATSAPP_PHONE: var
 secret WHATSAPP_APIKEY: var
@@ -16,11 +16,10 @@ Your Worker has access to the following bindings:
 Binding                                           Resource          
 env.STATE (5de60f92164f476588307a55793ca466)      KV Namespace      
 
-Uploaded tesla-watch (2.07 sec)
-Deployed tesla-watch triggers (0.91 sec)
+Uploaded tesla-watch (2.33 sec)
+Deployed tesla-watch triggers (1.69 sec)
   https://tesla-watch.ntfuzun.workers.dev
-  schedule: */5 * * * *
-Current Version ID: 2335411f-146d-4422-a484-af6f5917463d
+Current Version ID: 2336f3df-7f21-4991-add9-02b844575a5f
 URL: https://tesla-watch.ntfuzun.workers.dev
 worker secret WHATSAPP_PHONE yüklendi
 worker secret WHATSAPP_APIKEY yüklendi
@@ -28,5 +27,4 @@ worker secret WHATSAPP_APIKEY yüklendi
 {"ok":false,"error":"HTTP 403: <HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD><BODY>\n<H1>Access Denied</H1>\n \nYou don't have permission to access \"http&#58;&#47;&#47;www&#46;tesla"}
 
 == KV durumu (cron sonuçları) ==
-henüz durum yok: 
-[32mIf you think this is a bug then please create an issue at https://github.com/cloudflare/worker
+araç sayısı: 0 | ardışık hata: 2

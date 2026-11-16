@@ -3,6 +3,8 @@ name: Tesla Model Y takip
 on:
   schedule:
     - cron: "*/5 * * * *"      # GitHub en sık 5 dk'ya izin veriyor (yoğunlukta birkaç dk gecikebilir)
+  push:
+    paths: ["trigger.txt"]     # trigger.txt içine check / test / list yazıp push'la -> çıktı last_run.log'a yazılır
   workflow_dispatch:
     inputs:
       mode:
@@ -38,19 +40,24 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           MODE="${{ github.event.inputs.mode || 'check' }}"
+          LOG=/tmp/run.log
+          if [ "${{ github.event_name }}" = "push" ]; then MODE="$(head -1 trigger.txt | tr -d '[:space:]')"; LOG=last_run.log; fi
+          echo "mode=$MODE  $(date -u +%FT%TZ)" | tee "$LOG"
+          set -o pipefail
           case "$MODE" in
             test) python tesla_watch.py --test ;;
             list) python tesla_watch.py --list ;;
             *)    python tesla_watch.py ;;
-          esac
+          esac 2>&1 | tee -a "$LOG"
 
       - name: Durumu kaydet
         if: always()
         run: |
-          if [ -n "$(git status --porcelain tesla_seen.json)" ]; then
-            git config user.name  "tesla-watch-bot"
-            git config user.email "tesla-watch-bot@users.noreply.github.com"
-            git add tesla_seen.json
+          git config user.name  "tesla-watch-bot"
+          git config user.email "tesla-watch-bot@users.noreply.github.com"
+          if [ "${{ github.event_name }}" = "push" ]; then git add last_run.log; fi
+          if [ -n "$(git status --porcelain tesla_seen.json)" ]; then git add tesla_seen.json; fi
+          if ! git diff --cached --quiet; then
             git commit -m "durum güncellendi"
             git pull --rebase -q || true
             git push

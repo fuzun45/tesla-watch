@@ -201,6 +201,9 @@ def diff(prev, cars):
 
 # ---------------------- Ana mantık ----------------------
 def check():
+    if not (WA_PHONE and WA_KEY) and not (TG_TOKEN and TG_CHAT):
+        log("Bildirim kanalı (secrets) henüz ayarlı değil, kontrol atlandı.")
+        return
     state = load_state()
     seen = state.get("cars")
     fails = state.get("fails", 0)

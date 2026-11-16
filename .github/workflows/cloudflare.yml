@@ -71,8 +71,12 @@ jobs:
           done
 
           echo "== Cloudflare'den Tesla erişim testi =="
-          sleep 10
-          [ -n "$URL" ] && curl -sS -m 60 "$URL/diag"; echo
+          for i in 1 2 3 4 5 6; do
+            R=$(curl -sS -m 60 "$URL/diag" 2>&1); echo "$R" | head -c 600; echo
+            echo "$R" | grep -q '"ok"' && break; sleep 20
+          done
+          echo "== KV durumu (cron sonuçları) =="
+          wrangler kv key get state --namespace-id "$KV_ID" --remote 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log("araç sayısı:",Object.keys(j.cars||{}).length,"| ardışık hata:",j.fails||0)}catch{console.log("henüz durum yok:",s.slice(0,100))}})'
 
       - name: Log'u kaydet
         if: always()

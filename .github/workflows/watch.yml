@@ -1,8 +1,6 @@
 name: Tesla Model Y takip
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"      # GitHub en sık 5 dk'ya izin veriyor (yoğunlukta birkaç dk gecikebilir)
   push:
     paths: ["trigger.txt"]     # trigger.txt içine check / test / list yazıp push'la -> çıktı last_run.log'a yazılır
   workflow_dispatch:
@@ -47,7 +45,6 @@ jobs:
           case "$MODE" in
             test) python tesla_watch.py --test ;;
             list) python tesla_watch.py --list ;;
-            diag) pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null 2>&1 && python diag.py ;;
             *)    python tesla_watch.py ;;
           esac 2>&1 | tee -a "$LOG"
 

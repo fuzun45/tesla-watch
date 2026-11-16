@@ -1,0 +1,75 @@
+name: Cloudflare Worker kur / test
+
+# worker/ klasörü değişince ya da trigger-cf.txt push'lanınca çalışır.
+# Gerekli GitHub secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, WHATSAPP_PHONE, WHATSAPP_APIKEY
+on:
+  push:
+    paths: ["worker/**", "trigger-cf.txt", ".github/workflows/cloudflare.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cf-deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Kur ve test et
+        working-directory: worker
+        env:
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          WHATSAPP_APIKEY: ${{ secrets.WHATSAPP_APIKEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LOG=../cf_last_run.log
+          exec > >(tee "$LOG") 2>&1
+          echo "== $(date -u +%FT%TZ) =="
+          for v in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID WHATSAPP_PHONE WHATSAPP_APIKEY; do
+            if [ -n "${!v}" ]; then echo "secret $v: var"; else echo "secret $v: EKSİK"; fi
+          done
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "Cloudflare token yok, durdum."; exit 0; }
+          npm i -g wrangler@4 >/dev/null 2>&1
+          wrangler --version
+
+          # KV namespace (yoksa oluştur)
+          KV_ID=$(wrangler kv namespace list 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const a=JSON.parse(s);const n=a.find(x=>x.title.includes("tesla-watch-STATE")||x.title==="tesla-watch-state");console.log(n?n.id:"")}catch(e){console.log("")}})')
+          if [ -z "$KV_ID" ]; then
+            wrangler kv namespace create tesla-watch-state || true
+            KV_ID=$(wrangler kv namespace list | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);const n=a.find(x=>x.title.includes("tesla-watch"));console.log(n?n.id:"")})')
+          fi
+          echo "KV: $KV_ID"
+          cp wrangler.base.toml wrangler.toml
+          printf '\n[[kv_namespaces]]\nbinding = "STATE"\nid = "%s"\n' "$KV_ID" >> wrangler.toml
+
+          OUT=$(wrangler deploy 2>&1); echo "$OUT" | grep -v -i token
+          URL=$(echo "$OUT" | grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' | head -1)
+          echo "URL: $URL"
+
+          for s in WHATSAPP_PHONE WHATSAPP_APIKEY TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID; do
+            [ -n "${!s}" ] && printf '%s' "${!s}" | wrangler secret put "$s" >/dev/null 2>&1 && echo "worker secret $s yüklendi"
+          done
+
+          echo "== Cloudflare'den Tesla erişim testi =="
+          sleep 10
+          [ -n "$URL" ] && curl -sS -m 60 "$URL/diag"; echo
+
+      - name: Log'u kaydet
+        if: always()
+        run: |
+          git config user.name "tesla-watch-bot"
+          git config user.email "tesla-watch-bot@users.noreply.github.com"
+          git add cf_last_run.log 2>/dev/null || true
+          if ! git diff --cached --quiet; then git commit -qm "cf log"; git pull --rebase -q || true; git push -q; fi

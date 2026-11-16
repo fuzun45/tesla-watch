@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ACCOUNT_ID: 23d1770864688f345b9d521a52661e52   # gizli değil, hesap kimliği
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,12 +37,20 @@ jobs:
           LOG=../cf_last_run.log
           exec > >(tee "$LOG") 2>&1
           echo "== $(date -u +%FT%TZ) =="
-          for v in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID WHATSAPP_PHONE WHATSAPP_APIKEY; do
+          for v in CLOUDFLARE_API_TOKEN WHATSAPP_PHONE WHATSAPP_APIKEY; do
             if [ -n "${!v}" ]; then echo "secret $v: var"; else echo "secret $v: EKSİK"; fi
           done
           [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "Cloudflare token yok, durdum."; exit 0; }
           npm i -g wrangler@4 >/dev/null 2>&1
           wrangler --version
+          CF=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID
+          AUTH="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          # workers.dev alt alan adı yoksa oluştur
+          SUB=$(curl -s -H "$AUTH" $CF/workers/subdomain | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).result?.subdomain||"")}catch{console.log("")}})')
+          if [ -z "$SUB" ]; then
+            curl -s -X PUT -H "$AUTH" -H "Content-Type: application/json" $CF/workers/subdomain --data '{"subdomain":"fuzun45"}' | head -c 300; echo
+          fi
+          echo "workers.dev: $SUB"
 
           # KV namespace (yoksa oluştur)
           KV_ID=$(wrangler kv namespace list 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const a=JSON.parse(s);const n=a.find(x=>x.title.includes("tesla-watch-STATE")||x.title==="tesla-watch-state");console.log(n?n.id:"")}catch(e){console.log("")}})')

@@ -47,6 +47,7 @@ jobs:
           case "$MODE" in
             test) python tesla_watch.py --test ;;
             list) python tesla_watch.py --list ;;
+            diag) pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null 2>&1 && python diag.py ;;
             *)    python tesla_watch.py ;;
           esac 2>&1 | tee -a "$LOG"
 

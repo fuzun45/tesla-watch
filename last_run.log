@@ -1,15 +1,10 @@
-mode=list  2026-11-16T15:30:59Z
-Traceback (most recent call last):
-  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 267, in <module>
-    main()
-  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 258, in main
-    cars = fetch_all(make_session())
-           ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 95, in fetch_all
-    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
-RuntimeError: HTTP 403: <HTML><HEAD>
-<TITLE>Access Denied</TITLE>
-</HEAD><BODY>
-<H1>Access Denied</H1>
- 
-You don't have permission to access "http&#58;&#47;&#47;www&#46;tesla&#46;com&#47;inventory&#47;api&#47;v4&#47;inventor
+mode=diag  2026-11-16T15:32:29Z
+== curl_cffi ==
+chrome page 403 560 | api 403 <HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1>  
+safari page 200 2485 | api 429 {"cpr_chlge":"true","t":"508533539"}
+firefox page 403 560 | api 403 <HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1>  
+== playwright ==
+page status 403
+title Access Denied
+api responses []
+body Access Denied You don't have permission to access "http://www.tesla.com/tr_TR/inventory/used/my?" on this server.  Reference #18.aaf7d517.1794843171.5b450ac3  https://errors.edgesuite.net/18.aaf7d517.1794843171.5b450ac3

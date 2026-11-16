@@ -1,0 +1,15 @@
+mode=list  2026-11-16T15:30:59Z
+Traceback (most recent call last):
+  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 267, in <module>
+    main()
+  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 258, in main
+    cars = fetch_all(make_session())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/tesla-watch/tesla-watch/tesla_watch.py", line 95, in fetch_all
+    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+RuntimeError: HTTP 403: <HTML><HEAD>
+<TITLE>Access Denied</TITLE>
+</HEAD><BODY>
+<H1>Access Denied</H1>
+ 
+You don't have permission to access "http&#58;&#47;&#47;www&#46;tesla&#46;com&#47;inventory&#47;api&#47;v4&#47;inventor

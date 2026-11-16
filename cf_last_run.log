@@ -1,5 +1,45 @@
-== 2026-11-16T15:52:16Z ==
-secret CLOUDFLARE_API_TOKEN: EKSİK
+== 2026-11-16T15:54:17Z ==
+secret CLOUDFLARE_API_TOKEN: var
 secret WHATSAPP_PHONE: var
-secret WHATSAPP_APIKEY: EKSİK
-Cloudflare token yok, durdum.
+secret WHATSAPP_APIKEY: var
+4.163.0
+workers.dev: ntfuzun
+
+ ⛅️ wrangler 4.163.0
+────────────────────
+Resource location: remote 
+
+🌀 Creating namespace with title "tesla-watch-state"
+✨ Success!
+To access your new KV Namespace in your Worker, add the following snippet to your configuration file:
+{
+  "kv_namespaces": [
+    {
+      "binding": "tesla_watch_state",
+      "id": "5de60f92164f476588307a55793ca466"
+    }
+  ]
+}
+KV: 5de60f92164f476588307a55793ca466
+
+ ⛅️ wrangler 4.163.0
+────────────────────
+
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+Total Upload: 6.59 KiB / gzip: 2.80 KiB
+Worker Startup Time: 2 ms
+Your Worker has access to the following bindings:
+Binding                                           Resource          
+env.STATE (5de60f92164f476588307a55793ca466)      KV Namespace      
+
+Uploaded tesla-watch (1.46 sec)
+Deployed tesla-watch triggers (1.27 sec)
+  https://tesla-watch.ntfuzun.workers.dev
+  schedule: */5 * * * *
+Current Version ID: 40729d1c-51b5-4d09-8b14-6fb2019e483a
+URL: https://tesla-watch.ntfuzun.workers.dev
+worker secret WHATSAPP_PHONE yüklendi
+worker secret WHATSAPP_APIKEY yüklendi
+== Cloudflare'den Tesla erişim testi ==
+error code: 1042
+
